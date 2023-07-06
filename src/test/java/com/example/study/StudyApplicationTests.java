@@ -336,4 +336,21 @@ class StudyApplicationTests {
 		});
 	}
 
+
+	public static void main(String[] args) {
+		maximumEvenSplit(6914017674L);
+	}
+
+	public static List<Long> maximumEvenSplit(long finalSum) {
+		if(finalSum%2 ==1 ) return new ArrayList<>();
+		long index = (int)((-1+Math.sqrt(1+4*finalSum))/2);
+		long plusIndex = (finalSum-(index+index*index))/2;
+		List<Long> result = new ArrayList<>();
+		for (int i = 1; i <= index ; i++) {
+			if(i<= index-plusIndex) result.add(new Long(2*i));
+			else result.add(new Long(2*i+2));
+		}
+		return result;
+ 	}
+
 }
