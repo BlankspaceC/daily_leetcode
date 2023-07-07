@@ -32,10 +32,10 @@ class StudyApplicationTests {
 	MongoTemplate mongoTemplate;
 	@Autowired
 	KafkaProducer kafkaProducer;
-	@Autowired
-	UrlInfoMapper urlInfoMapper;
-	@Autowired
-	UrlRelationMapper urlRelationMapper;
+//	@Autowired
+//	UrlInfoMapper urlInfoMapper;
+//	@Autowired
+//	UrlRelationMapper urlRelationMapper;
 	@Resource
 	UrlUsedMapper urlUsedMapper;
 
@@ -338,7 +338,9 @@ class StudyApplicationTests {
 
 
 	public static void main(String[] args) {
-		maximumEvenSplit(6914017674L);
+		int[][] a = {{1,1,2,1},{1,1,3,1},{1,1,4,1}};
+		int[][] b = {{1,9,1,8},{10,10,10,10}};
+		System.out.println(findCrossingTime(3, 2, b));
 	}
 
 	public static List<Long> maximumEvenSplit(long finalSum) {
@@ -352,5 +354,124 @@ class StudyApplicationTests {
 		}
 		return result;
  	}
+
+	public static int findCrossingTime(int n, int k, int[][] time) {
+		Comparator<Worker> comparator1 = new Comparator<Worker>() {
+			@Override
+			public int compare(Worker o1, Worker o2) {
+				if (o1.throwBridgeTime == o2.throwBridgeTime) {
+					return  o2.index - o1.index;
+				}
+				return o2.throwBridgeTime - o1.throwBridgeTime;
+			}
+		};
+
+		Comparator<Worker> comparator2 = new Comparator<Worker>() {
+			@Override
+			public int compare(Worker o1, Worker o2) {
+				return o1.restTime - o2.restTime;
+			}
+		};
+
+		PriorityQueue<Worker> bridgeLeftWorker = new PriorityQueue<>(comparator1.reversed());
+		PriorityQueue<Worker> bridgeRightWorker = new PriorityQueue<>(comparator1);
+		PriorityQueue<Worker> working = new PriorityQueue<>(comparator2);
+		int needOut = n;
+		int bridgeLeftThing = 0;
+		int bridgeRightThing = 0;
+		int in = 0;
+		for (int i = 0; i < k; i++) {
+			bridgeLeftWorker.add(new Worker(time[i][0],time[i][1],time[i][2],time[i][3],time[i][0]+time[i][2],i));
+		}
+
+		boolean bridgeInUsed = false;
+		int nowTime = 0;
+		while (in != n || (in == n-1 && bridgeLeftThing == 1)){
+			//needOut !=0 || bridgeInUsed  || bridgeRightThing != 0 || working.size() > 0 || bridgeLeftThing != 1
+			//工作队列时间-1
+			PriorityQueue<Worker> temp = new PriorityQueue<>(comparator2);
+			while (working.size() > 0){
+				Worker poll = working.poll();
+				poll.restTime--;
+				temp.add(poll);
+			}
+			working = temp;
+
+			//归队
+			while (working.size() >0 && working.peek().restTime == 0){
+				Worker poll = working.poll();
+				switch (poll.handleType){
+					//new<->
+					case 4:
+						poll.handleType = 0;
+						bridgeLeftWorker.add(poll);
+						in++;
+						break;
+					//                  <->old
+					case 3:
+						bridgeRightThing++;
+						poll.handleType = 0;
+						bridgeRightWorker.add(poll);
+						break;
+					//     left -> right
+					case 1:
+						bridgeInUsed = false;
+						poll.handleType = 0;
+						bridgeRightWorker.add(poll);
+						break;
+					//     left <- right
+					case 2:
+						bridgeLeftThing++;
+						bridgeInUsed = false;
+						poll.handleType = 0;
+						bridgeLeftWorker.add(poll);
+						break;
+					default:
+						break;
+				}
+			}
+
+			//右到左
+			if(!bridgeInUsed && bridgeRightThing > 0 && bridgeRightWorker.size() > 0){
+				bridgeInUsed = true;
+				Worker poll = bridgeRightWorker.poll();
+				poll.restTime = poll.rightToLeft;
+				poll.handleType = 2;
+				working.add(poll);
+				bridgeRightThing--;
+			}
+			//左到右
+			if(!bridgeInUsed && needOut + bridgeRightThing > bridgeRightWorker.size() && bridgeLeftWorker.size() > 0){
+				bridgeInUsed = true;
+				Worker poll = bridgeLeftWorker.poll();
+				poll.restTime = poll.leftToRight;
+				poll.handleType = 1;
+				working.add(poll);
+			}
+
+			//搬旧
+			while (needOut > 0 && bridgeRightWorker.size() > 0){
+				needOut--;
+				Worker poll = bridgeRightWorker.poll();
+				poll.restTime = poll.pickOld;
+				poll.handleType = 3;
+				working.add(poll);
+			}
+
+			//入新
+			while (bridgeLeftThing > 0 && bridgeLeftWorker.size() > 0){
+				bridgeLeftThing--;
+				Worker poll = bridgeLeftWorker.poll();
+				poll.restTime = poll.pickNew;
+				poll.handleType = 4;
+				working.add(poll);
+			}
+
+			nowTime++;
+		}
+
+		return nowTime;
+
+	}
 
 }
