@@ -13,8 +13,45 @@ public class LCStudy {
 
 
     public static void main(String[] args) {
-
+        maxAbsoluteSum(new int[]{1,-3,2,3,-4});
     }
+
+
+    //1749. 任意子数组和的绝对值的最大值
+    public static int maxAbsoluteSum(int[] nums) {
+        int max=Math.abs(nums[0]);
+        int dp1=nums[0];
+        int dp2=nums[0];
+        for(int i=1;i<nums.length;i++){
+            dp1=Math.max(dp1+nums[i],nums[i]);
+            dp2=Math.min(dp2+nums[i],nums[i]);
+            max=Math.max(max,Math.max(dp1,Math.abs(dp2)));
+        }
+        return max;
+    }
+//    public int maxAbsoluteSum(int[] nums) {
+//        int[][] result = new int[nums.length][nums.length];
+//        for (int i = 0; i < nums.length; i++) {
+//            for (int j = 0; j < nums.length; j++) {
+//                if(j == i){
+//                    result[i][i] = nums[i];
+//                }else if(j < i){
+//                    result[i][j] = result[j][i];
+//                }else {
+//                    result[i][j] = result[i][j-1]+nums[j];
+//                }
+//            }
+//        }
+//        int res = Integer.MIN_VALUE;
+//        for (int i = 0; i < result.length; i++) {
+//            for (int i1 = 0; i1 < result[i].length; i1++) {
+//                if(Math.abs(result[i][i1]) > res){
+//                    res = Math.abs(result[i][i1]);
+//                }
+//            }
+//        }
+//        return res;
+//    }
 
     //980. 不同路径 III
     public static int uniquePathsIII(int[][] grid) {
