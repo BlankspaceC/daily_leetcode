@@ -13,7 +13,7 @@ public class LCStudy {
 
 
     public static void main(String[] args) {
-        maxAbsoluteSum(new int[]{1,-3,2,3,-4});
+        System.out.println(maxDistToClosest(new int[]{1,0,0,0}));
     }
 
 
@@ -27,6 +27,28 @@ public class LCStudy {
             dp2=Math.min(dp2+nums[i],nums[i]);
             max=Math.max(max,Math.max(dp1,Math.abs(dp2)));
         }
+        return max;
+    }
+
+    //849. 到最近的人的最大距离
+    public static int maxDistToClosest(int[] seats) {
+        int begin = 0,end=0,max = 0,now = 0;
+        for (int i = 0; seats[i] == 0; i++) {
+            begin++;
+        }
+        for (int i = seats.length-1; seats[i] == 0; i--) {
+            end++;
+        }
+        for (int i = begin; i < seats.length-end; i++) {
+            if(seats[i] == 1){
+                max = Math.max(now,max);
+                now = 0;
+                continue;
+            }
+            now++;
+        }
+        max = max%2 == 1?max/2+1 : max/2;
+        max = Math.max(max,Math.max(begin,end));
         return max;
     }
 //    public int maxAbsoluteSum(int[] nums) {
