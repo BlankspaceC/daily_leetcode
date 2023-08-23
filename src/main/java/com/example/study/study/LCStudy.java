@@ -13,7 +13,36 @@ public class LCStudy {
 
 
     public static void main(String[] args) {
-        System.out.println(maxDistToClosest(new int[]{1,0,0,0}));
+        for (int i : countPairs(5, new int[][]{{1,5},{1,5},{3,4},{2,5},{1,3},{5,1},{2,3},{2,5}}, new int[]{1, 2, 3, 4, 5})) {
+            System.out.print(i+" ");
+        }
+    }
+
+    //1782. 统计点对的数目
+    public static int[] countPairs(int n, int[][] edges, int[] queries) {
+        int[] point_num = new int[n];
+        Map<String,Integer> repeat = new HashMap<>();
+        for (int[] edge : edges) {
+            String key1 = (edge[0]-1) + "|" + (edge[1]-1);
+            repeat.put(key1,repeat.containsKey(key1) ? repeat.get(key1)+1 : 1);
+            point_num[edge[0]-1] += 1;
+            point_num[edge[1]-1] += 1;
+        }
+        Map<Integer,Integer> queryMap = new HashMap<>();
+        for (int i = 0; i < n-1; i++) {
+            for (int j = i+1; j < n; j++) {
+                Integer result = point_num[i] + point_num[j] - (repeat.get(i + "|" + j) == null ? 0 : repeat.get(i + "|" + j)) - (repeat.get(j + "|" + i) == null ? 0 : repeat.get(j + "|" + i));
+                queryMap.put(result,queryMap.containsKey(result) ? queryMap.get(result)+1:1);
+            }
+        }
+        int[] result = new int[queries.length];
+        Set<Map.Entry<Integer, Integer>> entries = queryMap.entrySet();
+        for (int i = 0; i < queries.length; i++) {
+            for (Map.Entry<Integer, Integer> entry : entries) {
+                if(entry.getKey()>queries[i]) result[i] += entry.getValue();
+            }
+        }
+        return result;
     }
 
 
