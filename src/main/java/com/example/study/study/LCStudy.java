@@ -1,6 +1,8 @@
 package com.example.study.study;
 
 
+import com.example.study.entity.TreeNode;
+
 import java.util.*;
 
 /**
@@ -15,6 +17,28 @@ public class LCStudy {
     public static void main(String[] args) {
         for (int i : countPairs(5, new int[][]{{1,5},{1,5},{3,4},{2,5},{1,3},{5,1},{2,3},{2,5}}, new int[]{1, 2, 3, 4, 5})) {
             System.out.print(i+" ");
+        }
+    }
+
+
+    //1448. 统计二叉树中好节点的数目
+    public static int goodNodes(TreeNode root) {
+        List<Character> list = new ArrayList<>();
+        int nowNum = Integer.MIN_VALUE;
+        goodNodesDg(root,list,nowNum);
+        return list.size();
+    }
+
+    public static void goodNodesDg(TreeNode root,List<Character> list,int nowNum){
+        if(root.val >= nowNum){
+            list.add('0');
+            nowNum = root.val;
+        }
+        if(root.left != null){
+            goodNodesDg(root.left,list,nowNum);
+        }
+        if(root.right!=null){
+            goodNodesDg(root.right,list,nowNum);
         }
     }
 
