@@ -338,9 +338,7 @@ class StudyApplicationTests {
 
 
 	public static void main(String[] args) {
-		int[][] a = {{1,1,2,1},{1,1,3,1},{1,1,4,1}};
-		int[][] b = {{1,9,1,8},{10,10,10,10}};
-		System.out.println(findCrossingTime(3, 2, b));
+		System.out.println(minimumRemoval(new int[]{1,1}));
 	}
 
 	public static List<Long> maximumEvenSplit(long finalSum) {
@@ -472,6 +470,37 @@ class StudyApplicationTests {
 
 		return nowTime;
 
+	}
+
+	//2171. 拿出最少数目的魔法豆
+	public static long minimumRemoval(int[] beans) {
+		if(beans.length == 1){
+			return 0;
+		}
+		Arrays.sort(beans);
+		int totalPre = 0;
+		int totalNext = 0;
+		long res = Long.MAX_VALUE;
+		//init;
+		for (int i = 0; i < beans.length; i++) {
+			totalNext += beans[i];
+		}
+		int preNum = 0;
+		int preSize = 0;
+		for (int i = 0; i < beans.length; i++) {
+			int cur = beans[i];
+			int num = 1;
+			while (i+1 < beans.length && beans[i+1] == cur){
+				num++;
+				i++;
+			}
+			totalPre += preNum * preSize;
+			totalNext -= (beans.length-1-i)*(cur-preNum) + num * (cur-preNum);
+			res = Math.min(res,totalPre + totalNext);
+			preNum = cur;
+			preSize = num;
+		}
+		return res;
 	}
 
 }

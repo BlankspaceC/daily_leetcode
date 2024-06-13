@@ -15,8 +15,10 @@ public class LCStudy {
 
 
     public static void main(String[] args) {
-        for (int i : countPairs(5, new int[][]{{1,5},{1,5},{3,4},{2,5},{1,3},{5,1},{2,3},{2,5}}, new int[]{1, 2, 3, 4, 5})) {
-            System.out.print(i+" ");
+        int[] a= new int[]{3,9,6,1,5,4,8,7,2};
+        sort(a,0,8);
+        for (int i : a) {
+            System.out.println(i);
         }
     }
 
@@ -198,5 +200,38 @@ public class LCStudy {
         }
         return ans;
     }
+
+    public static void sort(int arr[], int left, int right){
+        if(left >= right){
+            return ;
+        }
+        int index = quickSort(arr,left,right);
+        quickSort(arr,left,index-1);
+        quickSort(arr,index+1,right);
+    }
+
+    public static int quickSort(int arr[],int left,int right){
+        int start = left;
+        int check = arr[left];
+        while (left < right){
+            while (arr[right] >= check && left < right){
+                right--;
+            }
+            while (arr[left] <= check && left < right){
+                left++;
+            }
+            if(left<right){
+                int temp = arr[left];
+                arr[left] = arr[right];
+                arr[right] = temp;
+            }
+        }
+        int temp = arr[start];
+        arr[start] = arr[left];
+        arr[left] = temp;
+        return left;
+    }
+
+
 
 }
