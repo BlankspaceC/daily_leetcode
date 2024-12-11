@@ -2,6 +2,7 @@ package com.example.study.study;
 
 
 import com.example.study.entity.TreeNode;
+import org.apache.kafka.common.metrics.stats.Max;
 
 import java.util.*;
 
@@ -231,6 +232,38 @@ public class LCStudy {
         arr[left] = temp;
         return left;
     }
+
+    //179. 最大数
+    public static String largestNumber(int[] nums) {
+        if(nums.length == 1){
+            return String.valueOf(nums[0]);
+        }
+        List<Integer> list = new ArrayList<>();
+        boolean flag = false;
+        for (int num : nums) {
+            if(num > 0){
+                flag = true;
+            }
+        }
+
+        if(!flag){
+            return "0";
+        }
+
+        Collections.sort(list, (a, b) ->
+            (String.valueOf(a) + String.valueOf(b)).compareTo(String.valueOf(b) + String.valueOf(a))
+        );
+
+        StringBuilder sb = new StringBuilder("");
+
+        for (Integer integer : list) {
+            sb.append(integer);
+        }
+
+        return sb.toString();
+    }
+
+
 
 
 
