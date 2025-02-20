@@ -3,11 +3,14 @@ package com.example.study;
 import cn.hutool.core.collection.ConcurrentHashSet;
 import com.alibaba.druid.util.StringUtils;
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.study.config.KafkaProducer;
+import com.example.study.entity.TtJsonEntity;
 import com.example.study.entity.UsedUrlInfo;
 import com.example.study.mapper.UrlInfoMapper;
 import com.example.study.mapper.UrlRelationMapper;
 import com.example.study.mapper.UrlUsedMapper;
+import com.example.study.service.TtJsonService;
 import com.example.study.utils.CustomAggregationOperationHandler;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.jupiter.api.Test;
@@ -38,6 +41,9 @@ class StudyApplicationTests {
 //	UrlRelationMapper urlRelationMapper;
 	@Resource
 	UrlUsedMapper urlUsedMapper;
+
+	@Resource
+	private TtJsonService ttJsonService;
 
 	@Test
 	void mongoAggregationTest() {
@@ -196,6 +202,12 @@ class StudyApplicationTests {
 			System.out.println("主进程恢复运行");
 		}
 	}
+
+	@Test
+	public void ttJson(){
+		System.out.println(ttJsonService.getOne(new QueryWrapper<TtJsonEntity>().lambda().eq(TtJsonEntity::getId, "abc")).getConfig().get("lv"));
+	}
+
 
 	public static void urlExecute(String urlId,
 								  ConcurrentHashMap<String, ConcurrentHashSet<String>> parent_childrenMap,
