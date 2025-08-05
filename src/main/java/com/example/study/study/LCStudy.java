@@ -4,7 +4,16 @@ package com.example.study.study;
 import com.example.study.entity.TreeNode;
 import org.apache.kafka.common.metrics.stats.Max;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.List;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @Author: LongX
@@ -15,12 +24,8 @@ import java.util.*;
 public class LCStudy {
 
 
-    public static void main(String[] args) {
-        int[] a= new int[]{3,9,6,1,5,4,8,7,2};
-        sort(a,0,8);
-        for (int i : a) {
-            System.out.println(i);
-        }
+    public static void main(String[] args) throws InterruptedException {
+        System.out.println(totalFruit(new int[]{1,2,1,2,1,1,1,1,1,3,3,3,3,3,3,3}));
     }
 
 
@@ -283,8 +288,350 @@ public class LCStudy {
         return res;
     }
 
+    //3202. 找出有效子序列的最大长度 II
+    public static int maximumLength(int[] nums, int k) {
+        int[][] dp = new int[k][k];
+        int res = 0;
+        for (int num : nums) {
+            num = num % k;
+            for (int i = 0; i < k; i++) {
+                dp[i][num] = dp[num][i] + 1;
+                res = Math.max(res,dp[i][num]);
+            }
+        }
+        return res;
+    }
+
+    public static void threeThreadABC() throws InterruptedException {
+        Object aLock = new Object();
+        Object bLock = new Object();
+        Object cLock = new Object();
+
+        new Thread(() -> {
+            for (int i = 0; i < 10; i++){
+                try {
+                    synchronized (aLock){
+                        aLock.wait(5000);
+                        System.out.println("A");
+                    }
+                    synchronized (bLock){
+                        bLock.notifyAll();
+                    }
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }).start();
+        new Thread(() -> {
+            for (int i = 0; i < 10; i++){
+                try {
+                    synchronized (bLock){
+                        bLock.wait(5000);
+                        System.out.println("B");
+                    }
+                    synchronized (cLock){
+                        cLock.notifyAll();
+                    }
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+
+            }
+        }).start();
+        new Thread(() -> {
+            for (int i = 0; i < 10; i++){
+                try {
+                    synchronized (cLock){
+                        cLock.wait(5000);
+                        System.out.println("C");
+                    }
+                    synchronized (aLock){
+                        aLock.notifyAll();
+                    }
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+
+            }
+        }).start();
+        synchronized (aLock){
+            aLock.notifyAll();
+        }
+
+    }
+
+    public static void threeThreadABC2() throws InterruptedException {
+        Semaphore aLock = new Semaphore(1);
+        Semaphore bLock = new Semaphore(1);
+        Semaphore cLock = new Semaphore(1);
+        aLock.acquire();
+        bLock.acquire();
+        cLock.acquire();
+        new Thread(() -> {
+            for (int i = 0; i < 10; i++){
+                try {
+                    aLock.tryAcquire(5000, TimeUnit.MILLISECONDS);
+                    System.out.print("A");
+                    bLock.release();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }).start();
+        new Thread(() -> {
+            for (int i = 0; i < 10; i++){
+                try {
+                    bLock.tryAcquire(5000, TimeUnit.MILLISECONDS);
+                    System.out.print("B");
+                    cLock.release();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+
+            }
+        }).start();
+        new Thread(() -> {
+            for (int i = 0; i < 10; i++){
+                try {
+                    cLock.tryAcquire(5000, TimeUnit.MILLISECONDS);
+                    System.out.print( i == 9 ? "C" : "C,");
+                    aLock.release();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+
+            }
+        }).start();
+        aLock.release();
+
+    }
+
+    //3487. 删除后的最大子数组元素和
+    public static int maxSum(int[] nums) {
+        int maxNum = nums[0];
+        int total = 0;
+        Set<Integer> hasAdd = new HashSet<>();
+        for (int num : nums){
+            maxNum = Math.max(maxNum,num);
+            if(num > 0 && !hasAdd.contains(num)){
+                total+=num;
+                hasAdd.add(num);
+            }
+        }
+        if(maxNum <= 0){
+            return maxNum;
+        }
+        return total;
+    }
+
+    //2411. 按位或最大的最小子数组长度
+    public static int[] smallestSubarrays(int[] nums) {
+
+        Set<Integer> record = new HashSet<>();
+        for (int num : nums) {
+            record.add(num);
+        }
+        return record.size() > 100? solveB(nums) : solveA(nums);
+
+    }
+
+    public static int[] solveA(int[] nums){
+        int[] maxRecord = new int[nums.length];
+        int max = nums[nums.length-1];
+        maxRecord[nums.length-1] = max;
+        for (int i = nums.length-2; i >= 0; i--) {
+            if((max | nums[i]) > max){
+                max = max | nums[i];
+            }
+            maxRecord[i] = max;
+        }
+
+        int[] res = new int[nums.length];
+        for (int i = 0; i < nums.length; i++) {
+            int curLen = 1;
+            int curRes = nums[i];
+            if(i > 0 && nums[i] == nums[i-1]){
+                res[i] = Math.max(1,res[i-1] - 1);
+                continue;
+            }
+            for (int j = i + 1; j < nums.length && curRes < maxRecord[i]; j++) {
+
+                if((curRes | nums[j]) > curRes){
+                    curRes = curRes | nums[j];
+                    curLen = j - i + 1;
+                }
+            }
+            res[i] = curLen;
+        }
+
+        return res;
+    }
+
+    public static int[] solveB(int[] nums){
+        int[] res = new int[nums.length];
+        Map<Integer, Integer> minIndex = new HashMap<>();
+        for (int i = nums.length - 1; i >= 0; i--) {
+            minIndex.put(nums[i], i);
+            int nowMinIndex = i;
+            int total = 0;
+            List<Map.Entry<Integer, Integer>> sortByValue = minIndex.entrySet().stream().sorted(Comparator.comparing(Map.Entry::getValue)).collect(Collectors.toList());
+
+            for (Map.Entry<Integer, Integer> entry : sortByValue) {
+                Integer num = entry.getKey();
+                Integer index = entry.getValue();
+                if((total | num) > total){
+                    nowMinIndex = Math.max(nowMinIndex,index);
+                    total = total | num;
+                }
+            }
+
+            res[i] = nowMinIndex - i + 1;
+        }
+        return res;
+    }
+
+    //904. 水果成篮
+    public static int totalFruit(int[] fruits) {
+        int[] nowFruits = new int[]{-1,-1,-1,-1};
+        int nowBeginIndex = 0;
+        int max = 0;
+        for (int i = 0; i < fruits.length; i++) {
+            int fruit = fruits[i];
+            if(nowFruits[0] == -1 || nowFruits[0] == fruit){
+                nowFruits[0] = fruit;
+                nowFruits[2] = nowFruits[2] == -1 ? 1 : nowFruits[2] + 1;
+                max = Math.max(max,nowFruits[2] + Math.max(nowFruits[3],0));
+                continue;
+            }
+            if(nowFruits[1] == -1 || nowFruits[1] == fruit){
+                nowFruits[1] = fruit;
+                nowFruits[3] = nowFruits[3] == -1 ? 1 : nowFruits[3] + 1;
+                max = Math.max(max,Math.max(nowFruits[2],0) + nowFruits[3]);
+                continue;
+            }
+            //未命中，重新计数
+            while (true){
+                int removeFruit = fruits[nowBeginIndex];
+                if(nowFruits[0] == removeFruit && nowFruits[2] > 0){
+                    nowFruits[2] = nowFruits[2] - 1;
+                    nowBeginIndex++;
+                    if(nowFruits[2] == 0){
+                        //左初始化
+                        nowFruits[0] = fruit;
+                        nowFruits[2] = 1;
+                        break;
+                    }
+                    continue;
+                }
+                if(nowFruits[1] == removeFruit && nowFruits[3] > 0){
+                    nowFruits[3] = nowFruits[3] - 1;
+                    nowBeginIndex++;
+                    if(nowFruits[3] == 0){
+                        //右初始化
+                        nowFruits[1] = fruit;
+                        nowFruits[3] = 1;
+                        break;
+                    }
+                }
+            }
+        }
+        return max;
+    }
+
+    //3477. 水果成篮 II
+    public static int numOfUnplacedFruits(int[] fruits, int[] baskets) {
+        int max = -1;
+        int res = 0;
+        for (int i = 0; i < baskets.length; i++) {
+            if(baskets[i] > max){
+                max = baskets[i];
+            }
+        }
+        for (int i = 0; i < fruits.length; i++) {
+            int fruit = fruits[i];
+            if(fruit > max){
+                res++;
+                continue;
+            }
+            boolean flag = false;
+            for (int j = 0; j < baskets.length; j++) {
+                if(fruit <= baskets[j]){
+                    baskets[j] = -1;
+                    flag = true;
+                    break;
+                }
+            }
+            if(!flag){
+                res++;
+            }
+        }
+        return res;
+    }
+
+}
+//2353. 设计食物评分系统
+class FoodRatings {
+
+    String[] foods = null;
+    String[] cuisines = null;
+    int[] ratings = null ;
+
+    Map<String,Integer> foodIndex = new HashMap<>();
+    Map<String,List<Integer>> cuisinesIndex = new HashMap<>();
+    Map<String,Object[]> res = new HashMap<>();
+
+    public FoodRatings(String[] foods, String[] cuisines, int[] ratings) {
+        this.foods = foods;
+        this.cuisines = cuisines;
+        this.ratings = ratings;
+
+        for (int i = 0; i < foods.length; i++) {
+            foodIndex.put(foods[i],i);
+            cuisinesIndex.putIfAbsent(cuisines[i],new ArrayList<>());
+            cuisinesIndex.get(cuisines[i]).add(i);
+            if(!res.containsKey(cuisines[i])){
+                res.put(cuisines[i],new Object[]{foods[i],ratings[i]});
+                continue;
+            }
+            String oldFood = res.get(cuisines[i])[0].toString();
+            Integer oldScore = (Integer) res.get(cuisines[i])[1];
+            if (ratings[i] > oldScore || (ratings[i] == oldScore.intValue() && foods[i].compareTo(oldFood) < 0)){
+                res.put(cuisines[i],new Object[]{foods[i],ratings[i]});
+            }
+        }
+    }
 
 
+    public void changeRating(String food, int newRating) {
+        Integer index = foodIndex.get(food);
+        this.ratings[index] = newRating;
+        String cuisine = cuisines[index];
+        String oldFood = res.get(cuisine)[0].toString();
+        Integer oldScore = (Integer)res.get(cuisine)[1];
+        if(oldScore < newRating || ( oldScore.intValue() == newRating && food.compareTo(oldFood) < 0)){
+            res.put(cuisine,new Object[]{food,newRating});
+            return;
+        }
+        if(food.compareTo(oldFood) == 0){
+            List<Integer> indexs = cuisinesIndex.get(cuisine);
+            String nowFood = null;
+            Integer nowScore = null;
+            for (Integer integer : indexs) {
+                if(nowFood == null){
+                    nowFood = foods[integer];
+                    nowScore = ratings[integer];
+                    continue;
+                }
+                if(nowScore < ratings[integer] || (nowScore.intValue() == ratings[integer] && foods[integer].compareTo(nowFood) < 0)){
+                    nowFood = foods[integer];
+                    nowScore = ratings[integer];
+                }
+            }
+            res.put(cuisine,new Object[]{nowFood,nowScore});
+        }
+    }
 
-
+    public String highestRated(String cuisine) {
+        return res.get(cuisine)[0].toString();
+    }
 }
