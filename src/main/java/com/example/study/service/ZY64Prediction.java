@@ -68,7 +68,7 @@ public class ZY64Prediction{
     }
 
     public static void main(String[] args) throws IOException {
-        System.out.println(predict(""));
+        System.out.println(predict("病情"));
     }
 
 
