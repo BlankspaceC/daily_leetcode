@@ -18,7 +18,7 @@ public class LCStudy {
 
 
     public static void main(String[] args) throws InterruptedException {
-        System.out.println(maxCollectedFruits(new int[][]{{1,1},{1,1}}));
+        System.out.println(isValid("()"));
     }
 
 
@@ -639,6 +639,38 @@ public class LCStudy {
 
         return res;
     }
+
+    public static boolean isValid(String s) {
+        char[] sChars = s.toCharArray();
+        Stack<Character> stack = new Stack<>();
+
+        if(s.length() == 1){
+            return false;
+        }
+        for (char sChar : sChars) {
+            if(stack.empty() && (sChar == '}' || sChar == ']' || sChar == ')')){
+                return false;
+            }
+
+            if(sChar == '{' || sChar == '[' || sChar == '('){
+                stack.add(sChar);
+                continue;
+            }
+
+            if((sChar == '}' && stack.peek() == '{')||(sChar == ')' && stack.peek() == '(')||(sChar == ']' && stack.peek() == '[')){
+                stack.pop();
+            }else {
+                return false;
+            }
+        }
+
+        if(stack.empty()){
+            return true;
+        }
+
+        return false;
+    }
+
 
 }
 //2353. 设计食物评分系统
