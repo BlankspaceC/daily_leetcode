@@ -2,6 +2,8 @@ package com.example.study.study;
 
 
 import com.example.study.entity.TreeNode;
+import org.apache.poi.hssf.record.StyleRecord;
+
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.Semaphore;
@@ -18,7 +20,7 @@ public class LCStudy {
 
 
     public static void main(String[] args) throws InterruptedException {
-        System.out.println(isValid("()"));
+        System.out.println(checkValidString("((((()(()()()*()(((((*)()*(**(())))))(())()())(((())())())))))))(((((())*)))()))(()((*()*(*)))(*)()"));
     }
 
 
@@ -669,6 +671,81 @@ public class LCStudy {
         }
 
         return false;
+    }
+
+    public static boolean checkValidString(String s) {
+        char[] sChars = s.toCharArray();
+
+        Stack<Short> stackK = new Stack<>();
+        Stack<Short> stackStar = new Stack<>();
+        Byte[] shorts = new Byte[100];
+        Arrays.fill(shorts, (byte)0);
+
+        if(s.length() == 1){
+            return sChars[0] == '*';
+        }
+
+        for (Short i = 0; i < sChars.length; i++) {
+            Character sChar = sChars[i];
+            if(sChar == '*'){
+                stackStar.add(i);
+                continue;
+            }
+
+            if(sChar == '('){
+                stackK.add(i);
+                continue;
+            }
+
+            if(sChar == ')'){
+
+                if(stackK.empty() && stackStar.empty()){
+                    return false;
+                }
+
+                if(!stackK.empty()){
+                    stackK.pop();
+                    continue;
+                }
+
+                stackStar.pop();
+            }
+        }
+
+        if(stackK.empty()){
+            return true;
+        }
+
+        if(stackK.size() > stackStar.size()){
+            return false;
+        }
+
+        while (!stackK.empty()){
+            shorts[stackK.pop()] = (byte)1;
+        }
+
+        while (!stackStar.empty()){
+            shorts[stackStar.pop()] = (byte)2;
+        }
+
+        int kNum = 0;
+        for (Byte aShort : shorts) {
+            if(aShort ==(byte)0){
+                continue;
+            }
+
+            if(aShort == (byte)1){
+                kNum++;
+                continue;
+            }
+            if(aShort == (byte)2 && kNum >0){
+                kNum--;
+            }
+
+        }
+
+        return kNum == 0;
+
     }
 
 
