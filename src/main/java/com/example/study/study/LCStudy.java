@@ -20,8 +20,53 @@ public class LCStudy {
 
 
     public static void main(String[] args) throws InterruptedException {
-        System.out.println(checkValidString("((((()(()()()*()(((((*)()*(**(())))))(())()())(((())())())))))))(((((())*)))()))(()((*()*(*)))(*)()"));
+        generateParenthesis(3).forEach(System.out::println);
+
     }
+
+    //22. 括号生成
+    public static List<String> generateParenthesis(int n) {
+        List<String> res = new ArrayList<>();
+        dg(res, new StringBuilder("("),1,0,n);
+        return res;
+    }
+
+    public static void dg(List<String> res, StringBuilder sb,int left, int right, int n){
+        if(left > n){
+            return;
+        }
+        if(left == n && right == n){
+            res.add(sb.toString());
+        }
+
+        if(left > right){
+            dg(res,new StringBuilder(sb).append("("),left+1,right,n);
+            dg(res,new StringBuilder(sb).append(")"),left,right+1,n);
+        }else if(left == right){
+            dg(res,new StringBuilder(sb).append("("),left+1,right,n);
+        }
+    }
+
+
+
+    //856. 括号的分数
+    public static int scoreOfParentheses(String s) {
+        char[] charArray = s.toCharArray();
+        Stack<Integer> needPlus = new Stack<>();
+        needPlus.add(0);
+        for (int i = 0; i < charArray.length; i++) {
+            char c = charArray[i];
+            if(c == '('){
+                needPlus.add(0);
+            }else {
+                int max = Math.max(1, needPlus.pop() * 2);
+                needPlus.add(needPlus.pop() + max);
+            }
+        }
+        return needPlus.peek();
+    }
+
+
 
 
     //1448. 统计二叉树中好节点的数目
