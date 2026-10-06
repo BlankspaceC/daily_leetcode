@@ -24,6 +24,25 @@ public class LCStudy {
 
     }
 
+    //921. 使括号有效的最少添加
+    public static int minAddToMakeValid(String s) {
+        int leftKNum = 0;
+        int needAddNum = 0;
+        char[] charArray = s.toCharArray();
+        for (char c : charArray) {
+            if(c == '('){
+                leftKNum++;
+            }else {
+                if (leftKNum > 0) {
+                    leftKNum--;
+                }else {
+                    needAddNum++;
+                }
+            }
+        }
+        return leftKNum+needAddNum;
+    }
+
     //22. 括号生成
     public static List<String> generateParenthesis(int n) {
         List<String> res = new ArrayList<>();
